@@ -46,7 +46,24 @@ The codebase now uses a lightweight MVC-style structure with shared controllers,
 
 ```
 university_portal/
-├── assets/
+├── app/                          # Core Object-Oriented Engine Components
+│   ├── Controllers/              # Intercepts Requests & Formulates Responses
+│   │   ├── AuthController.php    # Process System Login/Register Routines
+│   │   └── EnrollmentController.php # Coordinates Intake Forms & Mail Transits
+│   ├── Core/
+│   │   └── Database.php          # Singleton Database Connection Factory
+│   ├── Middleware/
+│   │   └── RoleMiddleware.php    # Global RBAC Verification Guards
+│   ├── Repositories/             # Data Isolation Layer (Pure Encapsulated SQL)
+│   │   ├── AdminRepository.php
+│   │   ├── ContactRepository.php
+│   │   └── UserRepository.php    # Handles Active Student Profiles & Soft Deletes
+│   └── Support/                  # System-wide Shared Helper Utilites
+│       ├── Auth.php              # Session Token and Account Evaluators
+│       ├── MailerService.php     # SMTP Mail Dispatcher Setup (PHPMailer Wrap)
+│       ├── Page.php              # Reusable Student & Admin Master Layout Builders
+│       └── Validation.php        # Input Filter & XSS Stripping Engine
+│── assets/
 │   ├── css/
 │   │   ├── main.css              # Main site styling
 │   │   └── login-Registration.css # Login & Register styling
