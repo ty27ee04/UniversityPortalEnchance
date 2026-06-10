@@ -1,55 +1,13 @@
 <?php
-session_start();
-if (!isset($_SESSION["user"])) {
-    header("Location: login.php");
-    exit();
-}
+declare(strict_types=1);
+
+require_once __DIR__ . '/app/bootstrap.php';
+
+\App\Middleware\RoleMiddleware::requireStudent('login.php');
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>University website</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="assets/css/main.css">
-</head>
-
-<body>
-
-    <section class="header">
-        <nav>
-            <a href="index.php">
-                <img src="assets/images/logo.jpg" class="profile_img" alt="University Logo">
-            </a>
-
-            <div class="nav-links">
-                <ul>
-                    <li><a href="index.php" class="active">HOME</a></li>
-                    <li><a href="about.php">ABOUT</a></li>
-                    <li><a href="Sports.php">SPORTS</a></li>
-                    <li><a href="course.php">COURSE</a></li>
-                    <li><a href="contact.php">CONTACT</a></li>
-                    <li><a href="logout.php">LOGOUT</a></li>
-
-                </ul>
-            </div>
-        </nav>
-
-        <div class="text-box">
-            <h1>World's Biggest University</h1>
-            <p>
-                Making a website is now one of the easiest things in the world.
-                You just need to learn HTML, CSS, and JavaScript.
-            </p>
-            <a href="index.php" class="hero-btn">Visit Us To Know More</a>
-        </div>
-    </section>
+<?php \App\Support\Page::renderHead('University website'); ?>
+<?php \App\Support\Page::renderStudentHeader('index.php', "World's Biggest University", 'Making a website is now one of the easiest things in the world. You just need to learn HTML, CSS, and JavaScript.'); ?>
 
     <section class="course">
         <h1>Courses we offer</h1>
@@ -152,26 +110,4 @@ if (!isset($_SESSION["user"])) {
         <a href="contact.php" class="hero-btn">CONTACT US</a>
     </section>
 
-    <!-- ================= FOOTER  ================= -->
-    <section class="footer">
-        <h4>World's Biggest University</h4>
-
-        <p>
-            Empowering students through education, innovation, and excellence.
-            Building future leaders with knowledge, skills, and values.
-        </p>
-
-        <p>
-            © <?php echo date("Y"); ?> World's Biggest University.
-            All Rights Reserved.
-        </p>
-
-        <p>
-            Designed & Developed by
-            <strong>Modasiya Jaydip</strong>
-        </p>
-    </section>
-
-</body>
-
-</html>
+<?php \App\Support\Page::renderFooter(); ?>

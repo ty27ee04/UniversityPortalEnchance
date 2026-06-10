@@ -1,0 +1,14 @@
+{
+    "name": "university/portal",
+    "description": "University portal with student and admin workflows",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}

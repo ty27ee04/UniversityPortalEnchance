@@ -1,6 +1,7 @@
 <?php
-session_start();
-require_once "database.php";
+declare(strict_types=1);
+
+require_once __DIR__ . '/app/bootstrap.php';
 
 /* ================= SESSION TIMEOUT ================= */
 $timeout = 900;
@@ -13,31 +14,30 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) >
 $_SESSION['LAST_ACTIVITY'] = time();
 
 /* ================= AUTH ================= */
-if (!isset($_SESSION['admin_id'])) {
-    header("Location: admin_login.php");
-    exit();
-}
+\App\Middleware\RoleMiddleware::requireAdmin('admin_login.php');
+
+$adminController = new \App\Controllers\AdminController($conn);
 
 /* ================= CONTACT ACTIONS ================= */
 if (isset($_GET['hide_contact'])) {
-    $conn->query("UPDATE contact SET is_hidden=1 WHERE id=" . (int)$_GET['hide_contact']);
+    $adminController->hideContact((int) $_GET['hide_contact']);
 }
 if (isset($_GET['unhide_contact'])) {
-    $conn->query("UPDATE contact SET is_hidden=0 WHERE id=" . (int)$_GET['unhide_contact']);
+    $adminController->unhideContact((int) $_GET['unhide_contact']);
 }
 if (isset($_GET['delete_contact'])) {
-    $conn->query("UPDATE contact SET is_deleted=1 WHERE id=" . (int)$_GET['delete_contact']);
+    $adminController->deleteContact((int) $_GET['delete_contact']);
 }
 
 /* ================= USER ACTIONS ================= */
 if (isset($_GET['disable_user'])) {
-    $conn->query("UPDATE users SET is_disabled=1 WHERE id=" . (int)$_GET['disable_user']);
+    $adminController->disableUser((int) $_GET['disable_user']);
 }
 if (isset($_GET['enable_user'])) {
-    $conn->query("UPDATE users SET is_disabled=0 WHERE id=" . (int)$_GET['enable_user']);
+    $adminController->enableUser((int) $_GET['enable_user']);
 }
 if (isset($_GET['delete_user'])) {
-    $conn->query("UPDATE users SET is_deleted=1 WHERE id=" . (int)$_GET['delete_user']);
+    $adminController->deleteUser((int) $_GET['delete_user']);
 }
 
 /* ================= CONTACT PAGINATION + SEARCH ================= */
@@ -68,27 +68,8 @@ $u_start = ($u_page - 1) * $u_limit;
 $u_search = trim($_GET['u_search'] ?? '');
 
 $u_where = "is_deleted=0";
-if ($u_search !== '') {
-    $safe = $conn->real_escape_string($u_search);
-    $u_where .= " AND (full_name LIKE '%$safe%' OR email LIKE '%$safe%')";
-}
-
-$users = $conn->query(
-    "SELECT * FROM users WHERE $u_where ORDER BY id DESC LIMIT $u_start,$u_limit"
-);
-
-$u_total = $conn->query(
-    "SELECT COUNT(*) FROM users WHERE $u_where"
-)->fetch_row()[0];
-$u_pages = ceil($u_total / $u_limit);
 ?>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="assets/css/main.css">
+<?php \App\Support\Page::renderHead('Admin Dashboard'); ?>
     <style>
         .dashboard-header {
             min-height: 30vh;
@@ -204,9 +185,6 @@ $u_pages = ceil($u_total / $u_limit);
             background: #2ecc71
         }
     </style>
-</head>
-
-<body>
 
     <section class="dashboard-header">
         <h1>Admin Dashboard</h1>
@@ -216,7 +194,6 @@ $u_pages = ceil($u_total / $u_limit);
 
     <div class="dashboard">
 
-        <!-- CONTACT CARD -->
         <div class="card">
             <h2>Contact Messages</h2>
 
@@ -254,7 +231,6 @@ $u_pages = ceil($u_total / $u_limit);
             </div>
         </div>
 
-        <!-- USERS CARD -->
         <div class="card">
             <h2>Registered Users</h2>
 
@@ -292,13 +268,4 @@ $u_pages = ceil($u_total / $u_limit);
 
     </div>
 
-    <section class="footer">
-        <h4>© <?= date("Y") ?> World's Biggest University</h4>
-        <p>Empowering students through education, innovation, and excellence.</p>
-        <p>All Rights Reserved.</p>
-        <p>Designed & Developed by <strong>Modasiya Jaydip</strong></p>
-    </section>
-
-</body>
-
-</html>
+<?php \App\Support\Page::renderFooter('World\'s Biggest University'); ?>

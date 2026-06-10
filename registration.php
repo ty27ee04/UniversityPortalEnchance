@@ -1,9 +1,16 @@
 <?php
-session_start();
-if (isset($_SESSION["user"])) {
-    header("Location: index.php");
+declare(strict_types=1);
+
+require_once __DIR__ . '/app/bootstrap.php';
+
+if (\App\Middleware\RoleMiddleware::currentRole() !== null) {
+    header('Location: index.php');
     exit();
 }
+
+$controller = new \App\Controllers\AuthController($conn);
+$alerts = '';
+
 ?>
 
 <!DOCTYPE html>
@@ -23,52 +30,11 @@ if (isset($_SESSION["user"])) {
     <div class="container">
         <h1>Student Registration</h1>
         <?php
-        if (isset($_POST["submit"])) {
-            $fullname = $_POST["fullname"];
-            $email = $_POST["email"];
-            $password = $_POST["password"];
-            $passwordrepeat = $_POST["repeat_password"];
-
-            $passwordhash = password_hash($password, PASSWORD_DEFAULT);
-            $errors = [];
-
-            if (empty($fullname) || empty($email) || empty($password) || empty($passwordrepeat)) {
-                $errors[] = "All fields are required.";
-            }
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = "Please enter a valid email address.";
-            }
-            if (strlen($password) < 8) {
-                $errors[] = "Password must be at least 8 characters long.";
-            }
-            if ($password !== $passwordrepeat) {
-                $errors[] = "Passwords do not match.";
-            }
-
-            require_once "database.php";
-            $sql = "SELECT * FROM users WHERE email = '$email'";
-            $result = mysqli_query($conn, $sql);
-            if (mysqli_num_rows($result) > 0) {
-                $errors[] = "This email is already registered.";
-            }
-
-            if (!empty($errors)) {
-                foreach ($errors as $error) {
-                    echo "<div class='alert alert-danger'>$error</div>";
-                }
-            } else {
-                $sql = "INSERT INTO users (full_name, email, password) VALUES (?, ?, ?)";
-                $stmt = mysqli_stmt_init($conn);
-
-                if (mysqli_stmt_prepare($stmt, $sql)) {
-                    mysqli_stmt_bind_param($stmt, "sss", $fullname, $email, $passwordhash);
-                    mysqli_stmt_execute($stmt);
-                    echo "<div class='alert alert-success'>Registration successful. You can now log in.</div>";
-                } else {
-                    echo "<div class='alert alert-danger'>Something went wrong. Please try again.</div>";
-                }
-            }
+        if (isset($_POST['submit'])) {
+            $result = $controller->registerStudent($_POST);
+            $alerts = $result['message'];
         }
+        echo $alerts;
         ?>
 
 

@@ -1,56 +1,28 @@
 <?php
-session_start();
-require_once "database.php";
+declare(strict_types=1);
 
-/* If admin already logged in */
-if (isset($_SESSION['admin_id'])) {
-    header("Location: admin.php");
+require_once __DIR__ . '/app/bootstrap.php';
+
+if (\App\Middleware\RoleMiddleware::currentRole() === 'admin') {
+    header('Location: admin.php');
     exit();
 }
 
-$error = "";
+$controller = new \App\Controllers\AuthController($conn);
+$error = '';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $admin_id = trim($_POST['admin_id']);
-    $password = trim($_POST['password']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $result = $controller->loginAdmin($_POST);
 
-    if ($admin_id && $password) {
-        $stmt = $conn->prepare("SELECT * FROM admin WHERE admin_id = ?");
-        $stmt->bind_param("s", $admin_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows === 1) {
-            $admin = $result->fetch_assoc();
-            if (password_verify($password, $admin['password'])) {
-                $_SESSION['admin_id'] = $admin['admin_id'];
-                header("Location: admin.php");
-                exit();
-            } else {
-                $error = "Invalid Admin ID or Password.";
-            }
-        } else {
-            $error = "Invalid Admin ID or Password.";
-        }
-        $stmt->close();
-    } else {
-        $error = "All fields are required.";
+    if ($result['success']) {
+        header('Location: admin.php');
+        exit();
     }
+
+    $error = $result['message'];
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Login | World's Biggest University</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-    <!-- Main CSS -->
-    <link rel="stylesheet" href="assets/css/main.css">
+<?php \App\Support\Page::renderHead('Admin Login | World\'s Biggest University'); ?>
 
     <!-- Page UI CSS -->
     <style>
@@ -143,17 +115,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             margin-bottom: 80px;
         }
     </style>
-</head>
 
-<body>
-
-    <!-- HEADER -->
-    <section class="admin-header">
-        <div>
-            <h1>Admin Login</h1>
-            <p>Authorized access only</p>
-        </div>
-    </section>
+<?php \App\Support\Page::renderAdminHeader('Admin Login', 'Authorized access only'); ?>
 
     <!-- LOGIN CARD -->
     <div class="admin-login-box">
@@ -220,12 +183,4 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </section>
 
     <!-- FOOTER -->
-    <section class="footer">
-        <h4>World's Biggest University</h4>
-        <p>© <?php echo date("Y"); ?> World's Biggest University. All Rights Reserved.</p>
-        <p>Designed & Developed by <strong>Modasiya Jaydip</strong></p>
-    </section>
-
-</body>
-
-</html>
+<?php \App\Support\Page::renderAdminFooter(); ?>

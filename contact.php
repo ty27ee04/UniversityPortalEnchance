@@ -1,48 +1,25 @@
 <?php
-session_start();
-if (!isset($_SESSION["user"])) {
-    header("Location: login.php");
-    exit();
-}
+declare(strict_types=1);
 
-require_once "database.php";
+require_once __DIR__ . '/app/bootstrap.php';
 
-$success = "";
-$error = "";
+\App\Middleware\RoleMiddleware::requireStudent('login.php');
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $name = trim($_POST["name"] ?? "");
-    $email = trim($_POST["email"] ?? "");
-    $message = trim($_POST["message"] ?? "");
+$controller = new \App\Controllers\StudentController();
+$success = '';
+$error = '';
 
-    if ($name && $email && $message) {
-        $stmt = $conn->prepare(
-            "INSERT INTO contact (name, email, message) VALUES (?, ?, ?)"
-        );
-        $stmt->bind_param("sss", $name, $email, $message);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $result = $controller->submitContact($_POST);
 
-        if ($stmt->execute()) {
-            $success = "Thank you! Your message has been sent successfully.";
-        } else {
-            $error = "Database error. Please try again.";
-        }
-        $stmt->close();
+    if ($result['success']) {
+        $success = $result['message'];
     } else {
-        $error = "All fields are required.";
+        $error = $result['message'];
     }
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Contact Us | World's Biggest University</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Fonts + Main CSS -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/main.css">
+<?php \App\Support\Page::renderHead('Contact Us | World\'s Biggest University'); ?>
 
     <!-- 🔴 INLINE FIXES (IMPORTANT) -->
     <style>
@@ -116,33 +93,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             font-size: 1.4rem;
         }
     </style>
-</head>
 
-<body>
-
-    <!-- HEADER -->
-    <section class="header" style="min-height:60vh;">
-        <nav>
-            <a href="index.php">
-                <img src="assets/images/logo.jpg" class="profile_img" alt="Logo">
-            </a>
-            <div class="nav-links">
-                <ul>
-                    <li><a href="index.php">HOME</a></li>
-                    <li><a href="about.php">ABOUT</a></li>
-                    <li><a href="sports.php">SPORTS</a></li>
-                    <li><a href="course.php">COURSE</a></li>
-                    <li><a href="contact.php" class="active">CONTACT</a></li>
-                    <li><a href="logout.php">LOGOUT</a></li>
-                </ul>
-            </div>
-        </nav>
-
-        <div class="text-box">
-            <h1>Contact Us</h1>
-            <p>We’re here to help you</p>
-        </div>
-    </section>
+<?php \App\Support\Page::renderStudentHeader('contact.php', 'Contact Us', 'We’re here to help you', 'min-height:60vh;'); ?>
 
     <!-- CONTACT -->
     <section class="course">
@@ -195,26 +147,4 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </div>
     </section>
 
-    <!-- ================= FOOTER  ================= -->
-    <section class="footer">
-        <h4>World's Biggest University</h4>
-
-        <p>
-            Empowering students through education, innovation, and excellence.
-            Building future leaders with knowledge, skills, and values.
-        </p>
-
-        <p>
-            © <?php echo date("Y"); ?> World's Biggest University.
-            All Rights Reserved.
-        </p>
-
-        <p>
-            Designed & Developed by
-            <strong>Modasiya Jaydip</strong>
-        </p>
-    </section>
-
-</body>
-
-</html>
+<?php \App\Support\Page::renderFooter(); ?>

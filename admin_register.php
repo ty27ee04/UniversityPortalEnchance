@@ -1,72 +1,28 @@
 <?php
-session_start();
-require_once "database.php";
+declare(strict_types=1);
 
+require_once __DIR__ . '/app/bootstrap.php';
 
-/* If admin already logged in */
-if (isset($_SESSION['admin_id'])) {
-    header("Location: admin.php");
+if (\App\Middleware\RoleMiddleware::currentRole() === 'admin') {
+    header('Location: admin.php');
     exit();
 }
 
+$controller = new \App\Controllers\AuthController($conn);
+$success = '';
+$error = '';
 
-$success = "";
-$error = "";
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $result = $controller->registerAdmin($_POST);
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $admin_id = trim($_POST['admin_id']);
-    $password = trim($_POST['password']);
-    $confirm  = trim($_POST['confirm_password']);
-
-    if (!$admin_id || !$password || !$confirm) {
-        $error = "All fields are required.";
-    } elseif ($password !== $confirm) {
-        $error = "Passwords do not match.";
-    } elseif (strlen($password) < 6) {
-        $error = "Password must be at least 6 characters long.";
+    if ($result['success']) {
+        $success = $result['message'];
     } else {
-        // Check if admin already exists
-        $check = $conn->prepare("SELECT id FROM admin WHERE admin_id = ?");
-        $check->bind_param("s", $admin_id);
-        $check->execute();
-        $check->store_result();
-
-        if ($check->num_rows > 0) {
-            $error = "Admin ID already exists.";
-        } else {
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-            $insert = $conn->prepare(
-                "INSERT INTO admin (admin_id, password) VALUES (?, ?)"
-            );
-            $insert->bind_param("ss", $admin_id, $hashedPassword);
-
-            if ($insert->execute()) {
-                $success = "Admin registered successfully. You can now log in.";
-            } else {
-                $error = "Registration failed. Please try again.";
-            }
-            $insert->close();
-        }
-        $check->close();
+        $error = $result['message'];
     }
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Registration | World's Biggest University</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Google Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-    <!-- Main CSS -->
-    <link rel="stylesheet" href="assets/css/main.css">
+<?php \App\Support\Page::renderHead('Admin Registration | World\'s Biggest University'); ?>
 
     <!-- Inline Admin UI CSS -->
     <style>
@@ -195,17 +151,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             text-decoration: none;
         }
     </style>
-</head>
 
-<body>
-
-    <!-- ===== HEADER ===== -->
-    <section class="admin-header">
-        <div>
-            <h1>Admin Registration</h1>
-            <p>Create a new administrator account</p>
-        </div>
-    </section>
+<?php \App\Support\Page::renderAdminHeader('Admin Registration', 'Create a new administrator account'); ?>
 
     <!-- ===== REGISTRATION CARD ===== -->
     <div class="admin-register-box">
@@ -236,15 +183,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <strong>Admin ID</strong> and <strong>Password</strong>.
             </p>
 
-            <ul>
-                <li>Admin credentials are securely stored using password hashing.</li>
-                <li>Only registered admins can access the admin dashboard.</li>
-                <li>All admin activities are monitored for security.</li>
-            </ul>
 
-            <p style="text-align:center; margin-top:16px;">
-                Already registered?
-                <a href="admin_login.php">Go to Admin Login</a>
+    <?php \App\Support\Page::renderAdminFooter(); ?>
             </p>
         </div>
     </div>

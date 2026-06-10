@@ -1,41 +1,25 @@
 <?php
-session_start();
+declare(strict_types=1);
 
-if (isset($_SESSION["user"])) {
-    header("Location: index.php");
+require_once __DIR__ . '/app/bootstrap.php';
+
+if (\App\Middleware\RoleMiddleware::currentRole() !== null) {
+    header('Location: index.php');
     exit();
 }
 
-$error = "";
+$controller = new \App\Controllers\AuthController($conn);
+$error = '';
 
-if (isset($_POST["login"])) {
-    $email = trim($_POST["email"]);
-    $password = trim($_POST["password"]);
+if (isset($_POST['login'])) {
+    $result = $controller->loginStudent($_POST);
 
-    if (empty($email) || empty($password)) {
-        $error = "All fields are required.";
-    } else {
-        require_once "database.php";
-
-        $sql = "SELECT * FROM users WHERE email = ?";
-        $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, "s", $email);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $user = mysqli_fetch_array($result, MYSQLI_ASSOC);
-
-        if ($user) {
-            if (password_verify($password, $user["password"])) {
-                $_SESSION["user"] = "yes";
-                header("Location: index.php");
-                exit();
-            } else {
-                $error = "Invalid password.";
-            }
-        } else {
-            $error = "Email not found.";
-        }
+    if ($result['success']) {
+        header('Location: index.php');
+        exit();
     }
+
+    $error = $result['message'];
 }
 ?>
 

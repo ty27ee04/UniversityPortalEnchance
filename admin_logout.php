@@ -1,7 +1,5 @@
 <?php
-session_start();
-session_unset();
-session_destroy();
+declare(strict_types=1);
 
-header("Location: admin_login.php");
-exit();
+require_once __DIR__ . '/app/bootstrap.php';
+\App\Support\Auth::logout('admin_login.php');

@@ -4,6 +4,8 @@
 
 A full-stack academic web application for managing university activities with secure interfaces for students and administrators. Built with pure PHP, MySQL, and vanilla JavaScript without any frameworks.
 
+The codebase now uses a lightweight MVC-style structure with shared controllers, repositories, middleware, services, and reusable page helpers to reduce duplicated HTML layout.
+
 [![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net/)
 [![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
@@ -18,6 +20,7 @@ A full-stack academic web application for managing university activities with se
 - ✅ Secure registration & login system
 - ✅ Browse university information (courses, sports, facilities)
 - ✅ Contact form with database storage
+- ✅ Enrollment module for student requests
 - ✅ Session-based authentication
 - ✅ Responsive and clean user interface
 
@@ -36,6 +39,8 @@ A full-stack academic web application for managing university activities with se
 - 🚫 SQL injection prevention
 - 🛡️ XSS protection
 - 🔐 Protected admin routes
+- 🧼 Shared input validation and sanitization
+- 📫 Automated email notifications with PHPMailer
 
 ## 🏗️ Project Structure
 
@@ -53,6 +58,7 @@ university_portal/
 ├── sports.php                    # Sports page
 ├── course.php                    # Courses offered
 ├── contact.php                   # Contact form
+├── enrollment.php                # Student enrollment module
 ├── login.php                     # Student login
 ├── registration.php              # Student registration
 ├── admin_login.php               # Admin login
@@ -60,9 +66,22 @@ university_portal/
 ├── admin.php                     # Admin dashboard
 ├── admin_logout.php              # Admin logout
 ├── database.php                  # Database connection
+├── app/                          # MVC-style controllers, models, middleware, services
+├── USER_GUIDE.md                 # Portal access guide
+├── VALIDATION.md                 # Enhancement validation guide
+├── UPDATE.md                     # Change log and implementation notes
+├── composer.json                 # Composer deps and autoloading
 ├── .gitignore
 └── README.md
 ```
+
+## 🚀 Setup Notes
+
+1. Run `composer install` to install PHPMailer and generate the autoloader.
+2. Import `database/university_portal.sql` to create the `enrollments` table and the soft-delete fields used by the app.
+3. Open `enrollment.php` after logging in as a student to test the new enrollment flow and email notifications.
+4. Read [USER_GUIDE.md](USER_GUIDE.md) for portal access steps.
+5. Read [VALIDATION.md](VALIDATION.md) for the enhancement validation checklist.
 
 ## 🗄️ Database Schema
 
@@ -179,6 +198,8 @@ Student Portal: http://localhost/university_portal
 Admin Login:    http://localhost/university_portal/admin_login.php
 ```
 
+For a step-by-step usage walkthrough, see [USER_GUIDE.md](USER_GUIDE.md). For validation steps, see [VALIDATION.md](VALIDATION.md).
+
 ## 🎯 Default Credentials
 
 ### Admin Account
@@ -220,6 +241,10 @@ Admin Login:    http://localhost/university_portal/admin_login.php
 - **JavaScript** - Client-side interactivity
 - **Responsive Design** - Mobile-friendly UI
 
+### Architecture
+- **MVC-style structure** - Controllers, repositories, middleware, and services
+- **Shared page helpers** - Reusable layout output for student and admin pages
+
 ### Security
 - **Password Hashing** - `password_hash()` and `password_verify()`
 - **Session Management** - Secure user sessions
@@ -245,6 +270,10 @@ Admin Login:    http://localhost/university_portal/admin_login.php
 - ✅ Implemented soft delete functionality
 - ✅ Created efficient pagination system
 - ✅ Managed database relationships
+
+### UI Refactoring
+- ✅ Reduced repeated header/footer HTML with shared helpers
+- ✅ Made student and admin pages easier to maintain
 
 ### Frontend Development
 - ✅ Created responsive UI without frameworks
