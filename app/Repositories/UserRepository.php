@@ -77,10 +77,21 @@ final class UserRepository
         return $user;
     }
 
-    public function getActiveUsers(): array
+    public function getActiveUsers(?string $searchTerm = null): array
     {
-        // Query users table for active accounts where is_deleted is 0
-        $stmt = $this->conn->prepare('SELECT id, full_name, email, is_disabled FROM users WHERE is_deleted = 0');
+        if ($searchTerm !== null && trim($searchTerm) !== '') {
+            // Use SQL LIKE wildcards to find partial string matches safely
+            $query = 'SELECT id, full_name, email, is_disabled FROM users WHERE is_deleted = 0 AND (full_name LIKE ? OR email LIKE ?)';
+            $stmt = $this->conn->prepare($query);
+            
+            $likeTerm = '%' . $searchTerm . '%';
+            $stmt->bind_param('ss', $likeTerm, $likeTerm);
+        } else {
+            // Default query if no search parameter is provided
+            $query = 'SELECT id, full_name, email, is_disabled FROM users WHERE is_deleted = 0';
+            $stmt = $this->conn->prepare($query);
+        }
+
         $stmt->execute();
         $result = $stmt->get_result();
         

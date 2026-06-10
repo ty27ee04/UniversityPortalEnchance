@@ -1,28 +1,51 @@
 <?php
 declare(strict_types=1);
 
+// 1. Initialize bootstrap (handles autoloading and sets up global $conn)
 require_once __DIR__ . '/app/bootstrap.php';
 
+// 2. Enforce security access middleware checkpoint
 \App\Middleware\RoleMiddleware::requireStudent('login.php');
 
-\App\Support\Page::renderHead('Contact Us');
-\App\Support\Page::renderStudentHeader('contact.php', 'Contact Us', 'Get in touch with us');
-$success = '';
-$error = '';
+$message = '';
 
+// 3. Handle unified Repository form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $result = $controller->submitContact($_POST);
+    // Instantiate your decoupled ContactRepository using the global connection variable
+    $contactRepo = new \App\Repositories\ContactRepository($conn);
+    
+    // Extract and clean the incoming $_POST data fields
+    $name    = \App\Support\Validation::sanitizeString($_POST['name'] ?? '');
+    $email   = \App\Support\Validation::sanitizeEmail($_POST['email'] ?? '');
+    $msgText = \App\Support\Validation::sanitizeString($_POST['message'] ?? '');
 
-    if ($result['success']) {
-        $success = $result['message'];
+    // Validate that required fields are not empty
+    $errors = \App\Support\Validation::required(
+        compact('name', 'email', 'msgText'), 
+        ['name', 'email', 'msgText']
+    );
+
+    if (empty($errors)) {
+        // Save to database via your clean Repository pattern method
+        $success = $contactRepo->createContact([
+            'name'    => $name,
+            'email'   => $email,
+            'message' => $msgText
+        ]);
+
+        if ($success) {
+            $message = "<div class='alert alert-success' style='color: #155724; background-color: #d4edda; border-color: #c3e6cb; padding: 12px; margin-bottom: 20px; border-radius: 8px; font-weight: 600;'>Message sent successfully! Our team will get back to you soon.</div>";
+        } else {
+            $message = "<div class='alert alert-danger' style='color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; padding: 12px; margin-bottom: 20px; border-radius: 8px; font-weight: 600;'>Failed to submit your message. Please try again.</div>";
+        }
     } else {
-        $error = $result['message'];
+        // Convert input validation engine error arrays into clean HTML items list warnings
+        $message = \App\Support\Validation::toHtml($errors);
     }
 }
 ?>
 <?php \App\Support\Page::renderHead('Contact Us | World\'s Biggest University'); ?>
 
-    <!-- 🔴 INLINE FIXES (IMPORTANT) -->
     <style>
         /* force form to be clickable */
         .contact-form-wrapper,
@@ -97,31 +120,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <?php \App\Support\Page::renderStudentHeader('contact.php', 'Contact Us', 'We’re here to help you', 'min-height:60vh;'); ?>
 
-    <!-- CONTACT -->
     <section class="course">
         <h1>Get in Touch</h1>
         <p>Send us a message and we’ll respond shortly.</p>
 
-        <?php if ($success): ?>
-            <p style="color:green;font-weight:600;"><?php echo $success; ?></p>
-        <?php elseif ($error): ?>
-            <p style="color:red;font-weight:600;"><?php echo $error; ?></p>
-        <?php endif; ?>
-
-        <div class="row">
-            <!-- FORM -->
+        <div class="row" style="margin-top: 5%;">
             <div class="course-col contact-form-wrapper">
                 <h3>Send a Message</h3>
 
-                <form method="post">
-                    <input type="text" name="name" placeholder="Your Name" required>
-                    <input type="email" name="email" placeholder="Your Email" required>
-                    <textarea name="message" placeholder="Your Message" required></textarea>
+                <?= $message ?>
+
+                <form method="post" action="contact.php">
+                    <input type="text" name="name" placeholder="Your Name" value="<?= htmlspecialchars($_POST['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
+                    <input type="email" name="email" placeholder="Your Email" value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
+                    <textarea name="message" placeholder="Your Message" required><?= htmlspecialchars($_POST['message'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                     <button type="submit" class="contact-submit-btn">Send Message</button>
                 </form>
             </div>
 
-            <!-- INFO -->
             <div class="course-col contact-info-box">
                 <h3>Contact Information</h3>
 

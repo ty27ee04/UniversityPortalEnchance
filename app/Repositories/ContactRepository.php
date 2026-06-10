@@ -12,6 +12,30 @@ final class ContactRepository
     {
     }
 
+    public function createContact(array $data): bool
+    {
+        // 1. Prepare an OOSD parameterized MySQL statement to prevent SQL injection exploits
+        $stmt = $this->conn->prepare(
+            'INSERT INTO contact (name, email, message) VALUES (?, ?, ?)'
+        );
+
+        // 2. Bind parameters ('sss' means 3 string arguments)
+        $stmt->bind_param(
+            'sss',
+            $data['name'],
+            $data['email'],
+            $data['message']
+        );
+
+        // 3. Execute query and store boolean results state
+        $success = $stmt->execute();
+        
+        // 4. Always close statements to optimize system resources and prevent memory leaks
+        $stmt->close();
+
+        return $success;
+    }
+
     public function create(string $name, string $email, string $message): bool
     {
         $stmt = $this->conn->prepare('INSERT INTO contact (name, email, message) VALUES (?, ?, ?)');

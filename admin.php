@@ -45,7 +45,9 @@ if (isset($_GET['enable_user'])) {
 }
 
 // 5. Call the newly added method to fetch your active dataset array safely
-$activeUsersList = $userRepository->getActiveUsers();
+$searchTerm = isset($_GET['u_search']) ? \App\Support\Validation::sanitizeString($_GET['u_search']) : null;
+
+$activeUsersList = $userRepository->getActiveUsers($searchTerm);
 
 /* ================= SESSION TIMEOUT ================= */
 $timeout = 900;
@@ -244,6 +246,9 @@ $u_where = "is_deleted=0";
             <form method="get" class="search-box">
                 <input type="text" name="c_search" value="<?= htmlspecialchars($c_search) ?>" placeholder="Search contact">
                 <button type="submit">Search</button>
+                <?php if (!empty($_GET['c_search'])): ?>
+                    <a href="admin.php" class="action-btn" style="background:#6c757d; text-decoration:none; padding:5px 10px; border-radius:4px; color:white;">Clear</a>
+                <?php endif; ?>
             </form>
 
             <table>
@@ -281,6 +286,9 @@ $u_where = "is_deleted=0";
             <form method="get" class="search-box">
                 <input type="text" name="u_search" value="<?= htmlspecialchars($u_search) ?>" placeholder="Search user">
                 <button type="submit">Search</button>
+                <?php if (!empty($_GET['u_search'])): ?>
+                    <a href="admin.php" class="action-btn" style="background:#6c757d; text-decoration:none; padding:5px 10px; border-radius:4px; color:white;">Clear</a>
+                <?php endif; ?>
             </form>
 
             <table>
