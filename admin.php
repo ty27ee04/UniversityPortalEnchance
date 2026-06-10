@@ -3,6 +3,50 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/app/bootstrap.php';
 
+// 2. Enforce your security middleware checkpoint
+\App\Middleware\RoleMiddleware::requireAdmin('admin_login.php');
+
+// 3. Instantiate the UserRepository using the global connection variable
+$userRepository = new \App\Repositories\UserRepository($conn);
+
+// 4. Handle incoming Admin Actions (Disable, Enable, Soft Delete)
+if (isset($_GET['delete_user'])) {
+    $userId = (int)$_GET['delete_user'];
+    // Execute soft delete by changing the flag to 1 instead of running a destructive DELETE query
+    $stmt = $conn->prepare('UPDATE users SET is_deleted = 1 WHERE id = ?');
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $stmt->close();
+    
+    header('Location: admin.php');
+    exit();
+}
+
+if (isset($_GET['disable_user'])) {
+    $userId = (int)$_GET['disable_user'];
+    $stmt = $conn->prepare('UPDATE users SET is_disabled = 1 WHERE id = ?');
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $stmt->close();
+    
+    header('Location: admin.php');
+    exit();
+}
+
+if (isset($_GET['enable_user'])) {
+    $userId = (int)$_GET['enable_user'];
+    $stmt = $conn->prepare('UPDATE users SET is_disabled = 0 WHERE id = ?');
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $stmt->close();
+    
+    header('Location: admin.php');
+    exit();
+}
+
+// 5. Call the newly added method to fetch your active dataset array safely
+$activeUsersList = $userRepository->getActiveUsers();
+
 /* ================= SESSION TIMEOUT ================= */
 $timeout = 900;
 if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) > $timeout) {
@@ -246,21 +290,32 @@ $u_where = "is_deleted=0";
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
-                <?php while ($u = $users->fetch_assoc()): ?>
+                <?php if (!empty($activeUsersList)): ?>
+                    <?php foreach ($activeUsersList as $u): ?>
+                        <tr>
+                            <td><?= htmlspecialchars((string)$u['full_name'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars((string)$u['email'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= (int)($u['is_disabled'] ?? 0) === 1 ? 'Disabled' : 'Active' ?></td>
+                            <td>
+                                <?php if ((int)($u['is_disabled'] ?? 0) !== 1): ?>
+                                    <a class='action-btn disable' href='?disable_user=<?= $u['id'] ?>'>Disable</a>
+                                <?php else: ?>
+                                    <a class='action-btn enable' href='?enable_user=<?= $u['id'] ?>'>Enable</a>
+                                <?php endif; ?>
+                                
+                                <a class="action-btn delete" href="?delete_user=<?= $u['id'] ?>" onclick="return confirm('Are you sure you want to soft-delete this student record?');">Delete</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
                     <tr>
-                        <td><?= htmlspecialchars($u['full_name']) ?></td>
-                        <td><?= htmlspecialchars($u['email']) ?></td>
-                        <td><?= $u['is_disabled'] ? 'Disabled' : 'Active' ?></td>
-                        <td>
-                            <?= !$u['is_disabled'] ? "<a class='action-btn disable' href='?disable_user={$u['id']}'>Disable</a>" : "<a class='action-btn enable' href='?enable_user={$u['id']}'>Enable</a>" ?>
-                            <a class="action-btn delete" href="?delete_user=<?= $u['id'] ?>">Delete</a>
-                        </td>
+                        <td colspan="4" style="text-align: center; padding: 15px;">No active student accounts found.</td>
                     </tr>
-                <?php endwhile; ?>
+                <?php endif; ?>
             </table>
 
             <div class="pagination">
-                <?php for ($i = 1; $i <= $u_pages; $i++): ?>
+                <?php for ($i = 1; $i <= $u_page; $i++): ?>
                     <a class="<?= $i == $u_page ? 'active' : '' ?>" href="?u_page=<?= $i ?>&u_search=<?= urlencode($u_search) ?>"><?= $i ?></a>
                 <?php endfor; ?>
             </div>

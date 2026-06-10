@@ -5,7 +5,8 @@ require_once __DIR__ . '/app/bootstrap.php';
 
 \App\Middleware\RoleMiddleware::requireStudent('login.php');
 
-$controller = new \App\Controllers\StudentController();
+\App\Support\Page::renderHead('Contact Us');
+\App\Support\Page::renderStudentHeader('contact.php', 'Contact Us', 'Get in touch with us');
 $success = '';
 $error = '';
 

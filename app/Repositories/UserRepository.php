@@ -76,4 +76,20 @@ final class UserRepository
 
         return $user;
     }
+
+    public function getActiveUsers(): array
+    {
+        // Query users table for active accounts where is_deleted is 0
+        $stmt = $this->conn->prepare('SELECT id, full_name, email, is_disabled FROM users WHERE is_deleted = 0');
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $users = [];
+        while ($row = $result->fetch_assoc()) {
+            $users[] = $row;
+        }
+        
+        $stmt->close();
+        return $users;
+    }
 }
