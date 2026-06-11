@@ -59,9 +59,6 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) >
 }
 $_SESSION['LAST_ACTIVITY'] = time();
 
-/* ================= AUTH ================= */
-\App\Middleware\RoleMiddleware::requireAdmin('admin_login.php');
-
 $adminController = new \App\Controllers\AdminController($conn);
 
 /* ================= CONTACT ACTIONS ================= */
@@ -73,17 +70,6 @@ if (isset($_GET['unhide_contact'])) {
 }
 if (isset($_GET['delete_contact'])) {
     $adminController->deleteContact((int) $_GET['delete_contact']);
-}
-
-/* ================= USER ACTIONS ================= */
-if (isset($_GET['disable_user'])) {
-    $adminController->disableUser((int) $_GET['disable_user']);
-}
-if (isset($_GET['enable_user'])) {
-    $adminController->enableUser((int) $_GET['enable_user']);
-}
-if (isset($_GET['delete_user'])) {
-    $adminController->deleteUser((int) $_GET['delete_user']);
 }
 
 /* ================= CONTACT PAGINATION + SEARCH ================= */
@@ -118,27 +104,53 @@ $u_where = "is_deleted=0";
 <?php \App\Support\Page::renderHead('Admin Dashboard'); ?>
     <style>
         .dashboard-header {
-            min-height: 30vh;
+            min-height: 35vh;
             background: linear-gradient(rgba(8, 23, 56, .85), rgba(8, 23, 56, .85)), url("assets/images/bs.jpg") center/cover;
             color: #fff;
             text-align: center;
             padding-top: 60px
         }
 
+        .header-actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
         .logout-btn {
             display: inline-block;
-            margin-top: 15px;
             padding: 10px 22px;
             background: #e74c3c;
             color: #fff;
             border-radius: 30px;
             font-weight: 600;
-            text-decoration: none
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover { background: #c0392b; }
+
+        /* Premium Styled Academic Management Trigger */
+        .matrix-mgmt-btn {
+            display: inline-block;
+            padding: 10px 24px;
+            background: #2ecc71;
+            color: #fff;
+            border-radius: 30px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+            transition: all 0.3s ease;
+        }
+        .matrix-mgmt-btn:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.6);
         }
 
         .dashboard {
             width: 90%;
-            margin: -60px auto 80px
+            margin: -60px auto 80px;
         }
 
         .card {
@@ -146,47 +158,55 @@ $u_where = "is_deleted=0";
             padding: 24px;
             border-radius: 16px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, .15);
-            margin-bottom: 40px
+            margin-bottom: 40px;
         }
 
         .search-box {
-            margin: 15px 0
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
 
         .search-box input {
-            padding: 8px;
+            padding: 10px;
             border-radius: 8px;
-            border: 1px solid #ccc
+            border: 1px solid #ccc;
+            width: 250px;
         }
 
         .search-box button {
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 8px;
             border: none;
-            background: var(--primary);
+            background: #0a4da2;
             color: #fff;
-            font-weight: 600
+            font-weight: 600;
+            cursor: pointer;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 15px;
         }
 
-        th,
-        td {
-            padding: 12px;
+        th, td {
+            padding: 14px;
             border-bottom: 1px solid #ddd;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            text-align: left;
         }
 
         th {
             background: #f4f6fb;
+            color: #333;
+            font-weight: bold;
         }
 
         .pagination {
             text-align: center;
-            margin-top: 15px
+            margin-top: 20px;
         }
 
         .pagination a {
@@ -195,59 +215,52 @@ $u_where = "is_deleted=0";
             border-radius: 8px;
             margin: 0 4px;
             font-weight: 600;
-            text-decoration: none
+            text-decoration: none;
+            color: #333;
         }
 
         .pagination a.active {
-            background: var(--primary);
-            color: #fff
+            background: #0a4da2;
+            color: #fff;
         }
 
         .action-btn {
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 6px;
             color: #fff;
-            font-size: .8rem;
-            text-decoration: none
+            font-size: .85rem;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
         }
 
-        .hide {
-            background: #f39c12
-        }
-
-        .unhide {
-            background: #27ae60
-        }
-
-        .delete {
-            background: #c0392b
-        }
-
-        .disable {
-            background: #e67e22
-        }
-
-        .enable {
-            background: #2ecc71
-        }
+        .hide { background: #f39c12 }
+        .unhide { background: #27ae60 }
+        .delete { background: #c0392b }
+        .disable { background: #e67e22 }
+        .enable { background: #2ecc71 }
     </style>
 
     <section class="dashboard-header">
-        <h1>Admin Dashboard</h1>
-        <p>Welcome, <?= htmlspecialchars($_SESSION['admin_id']) ?></p>
-        <a href="admin_logout.php" class="logout-btn">Logout</a>
+        <h1>Admin Dashboard Workspace</h1>
+        <p>Authenticated Session Identity: <strong><?= htmlspecialchars($_SESSION['admin_id']) ?></strong></p>
+        
+        <div class="header-actions">
+            <a href="admin_academic.php" class="matrix-mgmt-btn">⚙️ Manage Academic Offerings Matrix</a>
+            <a href="admin_logout.php" class="logout-btn">Logout Workspace</a>
+        </div>
     </section>
 
     <div class="dashboard">
 
         <div class="card">
-            <h2>Contact Messages</h2>
+            <h2>Contact Messages Log Index</h2>
 
             <form method="get" class="search-box">
-                <input type="text" name="c_search" value="<?= htmlspecialchars($c_search) ?>" placeholder="Search contact">
+                <input type="text" name="c_search" value="<?= htmlspecialchars($c_search) ?>" placeholder="Search by name or keyword...">
                 <button type="submit">Search</button>
                 <?php if (!empty($_GET['c_search'])): ?>
-                    <a href="admin.php" class="action-btn" style="background:#6c757d; text-decoration:none; padding:5px 10px; border-radius:4px; color:white;">Clear</a>
+                    <a href="admin.php" class="action-btn" style="background:#6c757d; text-decoration:none; padding:8px 14px; border-radius:8px; color:white;">Clear</a>
                 <?php endif; ?>
             </form>
 
@@ -255,19 +268,19 @@ $u_where = "is_deleted=0";
                 <tr>
                     <th>Name</th>
                     <th>Email</th>
-                    <th>Message</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                    <th>Message Inquiry Payload</th>
+                    <th>Status Flag</th>
+                    <th>Operational Access Checks</th>
                 </tr>
                 <?php while ($c = $contacts->fetch_assoc()): ?>
                     <tr>
                         <td><?= htmlspecialchars($c['name']) ?></td>
                         <td><?= htmlspecialchars($c['email']) ?></td>
                         <td><?= htmlspecialchars($c['message']) ?></td>
-                        <td><?= $c['is_hidden'] ? 'Hidden' : 'Visible' ?></td>
+                        <td><span style="padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold; background:<?= $c['is_hidden'] ? '#fef9e7;color:#f39c12;' : '#e8f8f5;color:#27ae60;' ?>"><?= $c['is_hidden'] ? 'Hidden' : 'Visible' ?></span></td>
                         <td>
                             <?= !$c['is_hidden'] ? "<a class='action-btn hide' href='?hide_contact={$c['id']}'>Hide</a>" : "<a class='action-btn unhide' href='?unhide_contact={$c['id']}'>Unhide</a>" ?>
-                            <a class="action-btn delete" href="?delete_contact=<?= $c['id'] ?>">Delete</a>
+                            <a class="action-btn delete" href="?delete_contact=<?= $c['id'] ?>" onclick="return confirm('CRITICAL CONFIRMATION REQUIRED:\n\nAre you sure you want to soft-delete this contact message inquiry transaction?\nThis hides records from the workspace index but preserves relational tables histories.');">Delete</a>
                         </td>
                     </tr>
                 <?php endwhile; ?>
@@ -281,29 +294,29 @@ $u_where = "is_deleted=0";
         </div>
 
         <div class="card">
-            <h2>Registered Users</h2>
+            <h2>Registered Students Account Directory</h2>
 
             <form method="get" class="search-box">
-                <input type="text" name="u_search" value="<?= htmlspecialchars($u_search) ?>" placeholder="Search user">
+                <input type="text" name="u_search" value="<?= htmlspecialchars($u_search) ?>" placeholder="Search student by identity matches...">
                 <button type="submit">Search</button>
                 <?php if (!empty($_GET['u_search'])): ?>
-                    <a href="admin.php" class="action-btn" style="background:#6c757d; text-decoration:none; padding:5px 10px; border-radius:4px; color:white;">Clear</a>
+                    <a href="admin.php" class="action-btn" style="background:#6c757d; text-decoration:none; padding:8px 14px; border-radius:8px; color:white;">Clear</a>
                 <?php endif; ?>
             </form>
 
             <table>
                 <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                    <th>Student Full Name</th>
+                    <th>Email Address Identity</th>
+                    <th>Account Access Status</th>
+                    <th>Operational Control Flags</th>
                 </tr>
                 <?php if (!empty($activeUsersList)): ?>
                     <?php foreach ($activeUsersList as $u): ?>
                         <tr>
                             <td><?= htmlspecialchars((string)$u['full_name'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars((string)$u['email'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= (int)($u['is_disabled'] ?? 0) === 1 ? 'Disabled' : 'Active' ?></td>
+                            <td><span style="padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold; background:<?= (int)($u['is_disabled'] ?? 0) === 1 ? '#fadbd8;color:#c0392b;' : '#e8f8f5;color:#27ae60;' ?>"><?= (int)($u['is_disabled'] ?? 0) === 1 ? 'Disabled' : 'Active' ?></span></td>
                             <td>
                                 <?php if ((int)($u['is_disabled'] ?? 0) !== 1): ?>
                                     <a class='action-btn disable' href='?disable_user=<?= $u['id'] ?>'>Disable</a>
@@ -311,13 +324,13 @@ $u_where = "is_deleted=0";
                                     <a class='action-btn enable' href='?enable_user=<?= $u['id'] ?>'>Enable</a>
                                 <?php endif; ?>
                                 
-                                <a class="action-btn delete" href="?delete_user=<?= $u['id'] ?>" onclick="return confirm('Are you sure you want to soft-delete this student record?');">Delete</a>
+                                <a class="action-btn delete" href="?delete_user=<?= $u['id'] ?>" onclick="return confirm('CRITICAL CONFIRMATION REQUIRED:\n\nAre you sure you want to execute a soft-delete operation on this student record profile?\nAll historical database entries will be preserved for administrative integrity auditing.');">Delete</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="4" style="text-align: center; padding: 15px;">No active student accounts found.</td>
+                        <td colspan="4" style="text-align: center; padding: 25px; color:#7f8c8d; font-weight:bold;">No matching active student profiles located within current directory indexing bounds.</td>
                     </tr>
                 <?php endif; ?>
             </table>

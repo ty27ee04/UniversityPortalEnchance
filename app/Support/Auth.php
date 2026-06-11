@@ -19,7 +19,12 @@ final class Auth
             'name' => $user['full_name'] ?? '',
             'email' => $user['email'] ?? '',
         ];
-        $_SESSION['user'] = 'yes';
+        
+        $_SESSION['user'] = [
+            'id'        => (int)$user['id'],
+            'full_name' => $user['full_name'] ?? '',
+            'email'     => $user['email'] ?? '',
+        ];
     }
 
     public static function loginAdmin(array $admin): void
