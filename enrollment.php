@@ -203,7 +203,6 @@ function refreshDropdownsLock(changedField) {
     fetch(`enrollment.php?fetch_matrix=1&course_id=${courseId}&intake_id=${intakeId}&mode_id=${modeId}`)
         .then(res => res.json())
         .then(data => {
-            // 如果是在改变 Intake，我们需要动态刷新 Mode 的可选集，反之亦然
             if (changedField === 'intake' || changedField === 'course') {
                 const currentModeValue = modeDD.value;
                 modeDD.innerHTML = '<option value="">-- Choose Mode --</option>' + data.modes.map(m => `
