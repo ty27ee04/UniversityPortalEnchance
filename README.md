@@ -18,22 +18,22 @@ Through systematic software evolution, the original procedural code prototype wa
 
 The enhanced application enforces a strict **Separation of Concerns (SoC)**, segregating business logic, relational data access boundaries, and interface rendering into distinct abstraction layers.
 
-                        ┌─────────────────────────────────────────────────────────┐
-                        │   UNIVERSITY PORTAL MAINTENANCE & EVOLUTION PORTFOLIO   │
-                        └────────────────────────────┬────────────────────────────┘
-                                                     │
-          ┌──────────────────────────┬───────────────┴───────────────┬──────────────────────────┐
-          ▼                          ▼                               ▼                          ▼
- ┌─────────────────┐       ┌──────────────────┐            ┌───────────────────┐      ┌───────────────────┐
- │ ARCHITECTURAL   │       │ FUNCTIONAL & UX  │            │ SYSTEM SECURITY   │      │ DATA INTEGRITY &  │
- │   EVOLUTION     │       │   EVOLUTION      │            │    MIDDLEWARE     │      │ AUDIT DEFENSE     │
- └────────┬────────┘       └────────┬─────────┘            └─────────┬─────────┘      └─────────┬─────────┘
-          │                         │                                │                          │
-          ▼                         ▼                                ▼                          ▼
-   1. MVC Framework          2. New Enrollment                3. Role-Based RBAC         5. State-Machine Soft
-      & Repositories            Module                           Middleware                 Deletes
-                             4. PHPMailer Server             6. Input Validation
-                                Notifications                   & Sanitization
+                                 ┌─────────────────────────────────────────────────────────┐
+                                 │   UNIVERSITY PORTAL MAINTENANCE & EVOLUTION PORTFOLIO   │
+                                 └────────────────────────────┬────────────────────────────┘
+                                                              │
+                   ┌──────────────────────────┬───────────────┴───────────────┬──────────────────────────┐
+                   ▼                          ▼                               ▼                          ▼
+          ┌─────────────────┐       ┌──────────────────┐            ┌───────────────────┐      ┌───────────────────┐
+          │ ARCHITECTURAL   │       │ FUNCTIONAL & UX  │            │ SYSTEM SECURITY   │      │ DATA INTEGRITY &  │
+          │   EVOLUTION     │       │   EVOLUTION      │            │    MIDDLEWARE     │      │ AUDIT DEFENSE     │
+          └────────┬────────┘       └────────┬─────────┘            └─────────┬─────────┘      └─────────┬─────────┘
+                   |                         │                                │                          │
+                   ▼                         ▼                                ▼                          ▼
+          1. MVC Framework          2. New Enrollment                3. Role-Based RBAC         5. State-Machine Soft
+             & Repositories            Module                           Middleware                 Deletes
+                                    4. PHPMailer Server             6. Input Validation
+                                       Notifications                   & Sanitization
 
 ## ✨ Features
 
