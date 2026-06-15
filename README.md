@@ -2,9 +2,9 @@
 
 ![University Portal](assets/images/index-page.png)
 
-A full-stack academic web application for managing university activities with secure interfaces for students and administrators. Built with pure PHP, MySQL, and vanilla JavaScript without any frameworks.
+A highly secure, full-stack academic web application developed for managing university administrative pipelines and course allocations. Built using **Pure Object-Oriented PHP (7.4+)**, MySQL relational engines, and native vanilla ES6 JavaScript without relying on any external heavyweight frameworks.
 
-The codebase now uses a lightweight MVC-style structure with shared controllers, repositories, middleware, services, and reusable page helpers to reduce duplicated HTML layout.
+Through systematic software evolution, the original procedural code prototype was completely re-engineered into a modern, production-ready **Model-View-Controller (MVC) style structure** equipped with decoupled Repositories, strict Role-Based Access Control (RBAC) middleware, and a real-time transactional notification microservice.
 
 [![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net/)
 [![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
@@ -14,15 +14,39 @@ The codebase now uses a lightweight MVC-style structure with shared controllers,
 [![XAMPP](https://img.shields.io/badge/XAMPP-FB7A24?style=for-the-badge&logo=xampp&logoColor=white)](https://www.apachefriends.org/)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
+## 🏗️ Core Evolution Architecture (Invisible & Visible Enhancements)
+
+The enhanced application enforces a strict **Separation of Concerns (SoC)**, segregating business logic, relational data access boundaries, and interface rendering into distinct abstraction layers.
+
+                        ┌─────────────────────────────────────────────────────────┐
+                        │   UNIVERSITY PORTAL MAINTENANCE & EVOLUTION PORTFOLIO   │
+                        └────────────────────────────┬────────────────────────────┘
+                                                     │
+          ┌──────────────────────────┬───────────────┴───────────────┬──────────────────────────┐
+          ▼                          ▼                               ▼                          ▼
+ ┌─────────────────┐       ┌──────────────────┐            ┌───────────────────┐      ┌───────────────────┐
+ │ ARCHITECTURAL   │       │ FUNCTIONAL & UX  │            │ SYSTEM SECURITY   │      │ DATA INTEGRITY &  │
+ │   EVOLUTION     │       │   EVOLUTION      │            │    MIDDLEWARE     │      │ AUDIT DEFENSE     │
+ └────────┬────────┘       └────────┬─────────┘            └─────────┬─────────┘      └─────────┬─────────┘
+          │                         │                                │                          │
+          ▼                         ▼                                ▼                          ▼
+   1. MVC Framework          2. New Enrollment                3. Role-Based RBAC         5. State-Machine Soft
+      & Repositories            Module                           Middleware                 Deletes
+                             4. PHPMailer Server             6. Input Validation
+                                Notifications                   & Sanitization
+
 ## ✨ Features
 
 ### 👨‍🎓 **Student Portal**
 - ✅ Secure registration & login system
 - ✅ Browse university information (courses, sports, facilities)
 - ✅ Contact form with database storage
-- ✅ Enrollment module for student requests
 - ✅ Session-based authentication
 - ✅ Responsive and clean user interface
+- **✅ Dynamic Course Enrollment (New Module):** Replaced the original legacy view-only course offered layout with an interactive multi-choice course registration pipeline.
+- **✅ Bidirectional Interlocking Filters:** Implemented an asynchronous AJAX dropdown cascaded script. Choosing an Intake term trims Mode options; selecting a Study Mode dynamically trims Intake terms to prevent mismatched selections.
+- **✅ Multi-Subject Matrix Choice:** Allows a student to check multiple subject rows concurrently under a single verified academic matrix wrapper.
+- **✅ Automated Receipt Delivery:** Instantly triggers an external microservice upon enrolment to dispatch an HTML-formatted receipt to the student's email box.
 
 ### 👨‍💼 **Admin Dashboard**
 - 🔐 Secure admin authentication with session timeout
@@ -32,22 +56,25 @@ The codebase now uses a lightweight MVC-style structure with shared controllers,
 - 🔍 Advanced search functionality
 - 📄 Pagination for large datasets
 - ♻️ Soft delete for data safety
+- **✅ Academic Matrix Registry Console (`admin_academic.php`):** Created a brand-new workspace enabling administrative staff to dynamically add, edit, and orchestrate Intakes, Study Modes, Programs, and Subjects.
+- **✅ Defensive UX Confirmation Popups:** Guarded all destructive deletion events with client-side JavaScript execution block interceptors (`onclick="return confirm(...);"`) to avoid data losses from misclicks.
+- **✅ Interactive Statistical Insights:** Live reporting dashboard rendering metrics across active accounts, pending queries, and normalized matrix package lists.
 
 ### 🛡️ **Security Features**
-- 🔒 Password hashing with `password_hash()`
-- ⏱️ Session timeout protection
-- 🚫 SQL injection prevention
-- 🛡️ XSS protection
-- 🔐 Protected admin routes
-- 🧼 Shared input validation and sanitization
-- 📫 Automated email notifications with PHPMailer
+- **🔒 Password Cryptographic Hashing:** Handled via safe native php `password_hash()` configurations.
+- **🚫 SQL Injection Elimination:** Enforced 100% prepared parameterized statement models throughout the newly established repository layer.
+- **🛡️ Cross-Site Scripting (XSS) Stripping Engine:** Routed parameters through a centralized helper (`Validation.php`) for strict character escaping (`htmlspecialchars`).
+- **🔐 RBAC Route Guards:** Attached middleware controllers (`RoleMiddleware.php`) on restricted access routes to thwart direct URL guessing attacks.
+- **⏱️ Persistent Global Variable Protection:** Binds connection pools (`$conn`) to high-level global scopes to solve local variable isolation drops inside nested page includes.
 
+---
 ## 🏗️ Project Structure
 
 ```
 university_portal/
 ├── app/                          # Core Object-Oriented Engine Components
 │   ├── Controllers/              # Intercepts Requests & Formulates Responses
+│   │   ├── AdminController.php   # Directs administrative analytical pipelines
 │   │   ├── AuthController.php    # Process System Login/Register Routines
 │   │   └── EnrollmentController.php # Coordinates Intake Forms & Mail Transits
 │   ├── Core/
@@ -81,6 +108,7 @@ university_portal/
 ├── admin_login.php               # Admin login
 ├── admin_register.php            # Admin registration
 ├── admin.php                     # Admin dashboard
+├── admin_academic.php            # Brand-New Academic Governance Desk
 ├── admin_logout.php              # Admin logout
 ├── database.php                  # Database connection
 ├── app/                          # MVC-style controllers, models, middleware, services
@@ -185,9 +213,10 @@ git clone https://github.com/jaydipmodasiya/university_portal.git
 cd university_portal
 ```
 
-2. **Set up XAMPP**
+2. **Set up XAMPP** & **Composer**
    - Install XAMPP from [apachefriends.org](https://www.apachefriends.org/)
    - Move the project folder to `C:\xampp\htdocs\` (Windows) or `/opt/lampp/htdocs/` (Linux)
+   - Initialize Composer in your project terminal to download PHPMailer and generate the PSR-4 autoloader files `composer install`
 
 3. **Start Services**
    - Open XAMPP Control Panel
@@ -213,6 +242,19 @@ $dbname = "university_portal";
 ```
 Student Portal: http://localhost/university_portal
 Admin Login:    http://localhost/university_portal/admin_login.php
+```
+
+7. 3. Environment Allocation Configuration
+Create a pure text file named .env directly in the project root folder. Populate your credentials using the strict double-quote encapsulation model:
+```
+MAIL_TRANSPORT=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_ENCRYPTION=tls
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_FROM_ADDRESS=
+MAIL_FROM_NAME="MMU University Portal"
 ```
 
 For a step-by-step usage walkthrough, see [USER_GUIDE.md](USER_GUIDE.md). For validation steps, see [VALIDATION.md](VALIDATION.md).
@@ -398,6 +440,7 @@ For queries, suggestions, or contributions:
 <div align="center">
   
 **Made with ❤️ by Jaydip Modasiya**
+**Evolved with ❤️ by Tan Yong Ye & Lee Vi Von & Teoh Yi Xin Software Evolution & Maintenance (CSE6364 Portfolio)**
 
 [⬆ Back to Top](#-university-portal)
 
